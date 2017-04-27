@@ -1,0 +1,6 @@
+.idea/
+__pycache__/
+chromedriver_binary/chromedriver*
+*.pyc
+.*
+!.gitignore
