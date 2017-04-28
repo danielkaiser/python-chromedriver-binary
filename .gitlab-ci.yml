@@ -1,34 +1,42 @@
-
 image: ubuntu:17.04
 before_script:
     - apt-get update
+    - apt-get install -y curl pandoc
     - curl -sLO https://bootstrap.pypa.io/get-pip.py
 
 build:
     stage: build
     script:
         - apt-get install -y python3.6
+        - python3.6 get-pip.py
         - python3.6 setup.py sdist
     artifacts:
         paths:
         - dist/
+        expire_in: 1 week
 
 python3-test:
+    variables:
+          GIT_STRATEGY: none
     script:
         - apt-get install -y python3.6
         - python3.6 get-pip.py
         - rm get-pip.py
-        - pip install --no-index file://dist/*
-        - ls `python -c "import chromedriver_binary; print(chromedriver_binary.chromedriver_filename)"`
+        - pip install --no-index dist/*
+        - ls `python3.6 -c "import chromedriver_binary; print(chromedriver_binary.chromedriver_filename)"`
     dependencies:
     - build
 
 python2-test:
+    variables:
+          GIT_STRATEGY: none
     script:
         - apt-get install -y python2.7
         - python2.7 get-pip.py
         - rm get-pip.py
-        - pip install --no-index file://dist/*
-        - ls `python -c "import chromedriver_binary; print(chromedriver_binary.chromedriver_filename)"`
+        - pip install --no-index dist/*
+        - ls -R /usr/local/lib/python2.7
+        - ls `python2.7 -c "import chromedriver_binary; print(chromedriver_binary.chromedriver_filename)"`
     dependencies:
     - build
+

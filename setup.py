@@ -1,5 +1,5 @@
 from setuptools import setup
-from setuptools.command.install import install
+from setuptools.command.build_py import build_py
 from chromedriver_binary.utils import get_chromedriver_filename, get_chromedriver_url, find_binary_in_path
 
 import sys
@@ -21,13 +21,6 @@ def create_required_files():
     """
     Creates the files required for building a package.
     """
-    # Manifest
-    if not os.path.isfile('MANIFEST.in'):
-        with open('MANIFEST.in', 'w') as manifest_in:
-            manifest_in.write('include *.txt')
-    # License
-    if not os.path.isfile('LICENSE.txt'):
-        shutil.copyfile('LICENSE', 'LICENSE.txt')
     # Readme in reST format
     if not os.path.isfile('README.txt'):
         subprocess.call(['pandoc', 'README.md', '-t', 'rst', '-o', 'README.txt'])
@@ -37,7 +30,7 @@ with open('README.txt') as readme_file:
     long_description = readme_file.read()
 
 
-class DownloadChromedriver(install):
+class DownloadChromedriver(build_py):
     def run(self):
         """
         Downloads, unzips and installs chromedriver. 
@@ -70,12 +63,12 @@ class DownloadChromedriver(install):
                 print("\nChromedriver already installed at {}...\n".format(chromedriver_filename))
             if not os.access(chromedriver_filename, os.X_OK):
                 os.chmod(chromedriver_filename, 0o744)
-        install.run(self)
+        build_py.run(self)
 
 
 setup(
     name="chromedriver-binary",
-    version="2.29.2",
+    version="2.29.1",
     author="Daniel Kaiser",
     author_email="daniel.kaiser94@gmail.com",
     description="Installer for chromedriver.",
@@ -94,5 +87,5 @@ setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
         "License :: OSI Approved :: MIT License",
     ],
-    cmdclass={'install': DownloadChromedriver}
+    cmdclass={'build_py': DownloadChromedriver}
 )
