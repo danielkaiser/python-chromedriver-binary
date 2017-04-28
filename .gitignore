@@ -1,6 +1,12 @@
 .idea/
 __pycache__/
+dist/
+*.egg-info*
 chromedriver_binary/chromedriver*
 *.pyc
 .*
+LICENSE.txt
+MANIFEST.in
+README.txt
 !.gitignore
+!.gitlab-ci.yml
