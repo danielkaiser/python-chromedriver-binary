@@ -33,7 +33,7 @@ with open('README.txt') as readme_file:
 class DownloadChromedriver(build_py):
     def run(self):
         """
-        Downloads, unzips and installs chromedriver. 
+        Downloads, unzips and installs chromedriver.
         If a chromedriver binary is found in PATH it will be copied, otherwise downloaded.
         """
         chromedriver_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'chromedriver_binary')
@@ -68,7 +68,7 @@ class DownloadChromedriver(build_py):
 
 setup(
     name="chromedriver-binary",
-    version="2.31.0",
+    version="2.33.0",
     author="Daniel Kaiser",
     author_email="daniel.kaiser94@gmail.com",
     description="Installer for chromedriver.",
