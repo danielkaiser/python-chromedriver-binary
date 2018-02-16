@@ -79,6 +79,9 @@ setup(
     package_data={
         'chromedriver_binary': ['chromedriver*']
     },
+    entry_points={
+        'console_scripts': ['chromedriver-path=chromedriver_binary.utils:print_chromedriver_path'],
+    },
     long_description=long_description,
     classifiers=[
         "Development Status :: 5 - Production/Stable",

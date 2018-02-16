@@ -65,3 +65,10 @@ def find_binary_in_path(filename):
         if os.path.isfile(binary) and os.access(binary, os.X_OK):
             return binary
     return None
+
+
+def print_chromedriver_path():
+    result = os.path.abspath(os.path.dirname(__file__))
+    if 'PATH' in os.environ:
+        result = os.environ["PATH"] + get_variable_separator() + result
+    print(result)
