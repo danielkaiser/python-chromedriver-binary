@@ -67,8 +67,15 @@ def find_binary_in_path(filename):
     return None
 
 
+def get_chromedriver_path():
+    """
+    :return: path of the chromedriver binary
+    """
+    return os.path.abspath(os.path.dirname(__file__))
+
+
 def print_chromedriver_path():
-    result = os.path.abspath(os.path.dirname(__file__))
-    if 'PATH' in os.environ:
-        result = os.environ["PATH"] + get_variable_separator() + result
-    print(result)
+    """
+    Print the path of the chromedriver binary.
+    """
+    print(get_chromedriver_path())

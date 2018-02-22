@@ -1,4 +1,4 @@
-image: ubuntu:17.04
+image: ubuntu:rolling
 before_script:
     - apt-get update
     - apt-get install -y curl pandoc
@@ -20,10 +20,14 @@ python3-test:
           GIT_STRATEGY: none
     script:
         - apt-get install -y python3.6
+        - apt-get install -y libglib2.0-0 libx11-6 libnss3
         - python3.6 get-pip.py
         - rm get-pip.py
         - pip install --no-index dist/*
         - ls `python3.6 -c "import chromedriver_binary; print(chromedriver_binary.chromedriver_filename)"`
+        - VERSION=$(PATH=`chromedriver-path` chromedriver -v | cut -d' ' -f2 | cut -d'.' -f1-2)
+        - PY_VERS=$(pip freeze | grep 'chromedriver-binary' | cut -d'=' -f3 | cut -d'.' -f1-2)
+        - test "$VERSION" = "$PY_VERS"
     dependencies:
     - build
 
@@ -32,11 +36,14 @@ python2-test:
           GIT_STRATEGY: none
     script:
         - apt-get install -y python2.7
+        - apt-get install -y libglib2.0-0 libx11-6 libnss3
         - python2.7 get-pip.py
         - rm get-pip.py
         - pip install --no-index dist/*
-        - ls -R /usr/local/lib/python2.7
         - ls `python2.7 -c "import chromedriver_binary; print(chromedriver_binary.chromedriver_filename)"`
+        - VERSION=$(PATH=`chromedriver-path` chromedriver -v | cut -d' ' -f2 | cut -d'.' -f1-2)
+        - PY_VERS=$(pip freeze | grep 'chromedriver-binary' | cut -d'=' -f3 | cut -d'.' -f1-2)
+        - test "$VERSION" = "$PY_VERS"
     dependencies:
     - build
 

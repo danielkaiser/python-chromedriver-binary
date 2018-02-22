@@ -25,3 +25,9 @@ driver = webdriver.Chrome()
 driver.get("http://www.python.org")
 assert "Python" in driver.title
 ```
+
+### Exporting chromedriver binary path
+This package installs a small shell script `chromedriver-path` to easily set and export the PATH variable:
+```
+$ export PATH=$PATH:`chromedriver-path`
+```
