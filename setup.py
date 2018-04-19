@@ -2,11 +2,9 @@ from setuptools import setup
 from setuptools.command.build_py import build_py
 from chromedriver_binary.utils import get_chromedriver_filename, get_chromedriver_url, find_binary_in_path
 
-import sys
 import os
 import zipfile
-import shutil
-import subprocess
+
 try:
     from io import BytesIO
     from urllib.request import urlopen, URLError
@@ -17,16 +15,7 @@ except ImportError:
 __author__ = 'Daniel Kaiser <d.kasier@fz-juelich.de>'
 
 
-def create_required_files():
-    """
-    Creates the files required for building a package.
-    """
-    # Readme in reST format
-    if not os.path.isfile('README.txt'):
-        subprocess.call(['pandoc', 'README.md', '-t', 'rst', '-o', 'README.txt'])
-
-create_required_files()
-with open('README.txt') as readme_file:
+with open('README.md') as readme_file:
     long_description = readme_file.read()
 
 
@@ -68,7 +57,7 @@ class DownloadChromedriver(build_py):
 
 setup(
     name="chromedriver-binary",
-    version="2.37.0",
+    version="2.38.0",
     author="Daniel Kaiser",
     author_email="daniel.kaiser94@gmail.com",
     description="Installer for chromedriver.",
@@ -82,6 +71,7 @@ setup(
     entry_points={
         'console_scripts': ['chromedriver-path=chromedriver_binary.utils:print_chromedriver_path'],
     },
+    long_description_content_type='text/markdown',
     long_description=long_description,
     classifiers=[
         "Development Status :: 5 - Production/Stable",
