@@ -29,11 +29,11 @@ def get_variable_separator():
     return ':'
 
 
-def get_chromedriver_url(version='2.41'):
+def get_chromedriver_url(version='2.42'):
     """
-    Generates the download URL for current platform , architecture and the given version. Default version is 2.41.
+    Generates the download URL for current platform , architecture and the given version. Default version is 2.42.
     Supports Linux, MacOS and Windows.
-    :param version: chromedriver version string, default '2.41'
+    :param version: chromedriver version string, default '2.42'
     :return: Download URL for chromedriver
     """
     base_url = 'https://chromedriver.storage.googleapis.com/'
