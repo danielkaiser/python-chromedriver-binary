@@ -1,5 +1,5 @@
 # chromedriver-binary
-Downloads and installs the [chromedriver](https://sites.google.com/a/chromium.org/chromedriver/) binary version 73.0.3683.20 for automated testing of webapps. The installer supports Linux, MacOS and Windows operating systems.
+Downloads and installs the [chromedriver](https://sites.google.com/a/chromium.org/chromedriver/) binary version 73.0.3683.68 for automated testing of webapps. The installer supports Linux, MacOS and Windows operating systems.
 
 ## Installation
 

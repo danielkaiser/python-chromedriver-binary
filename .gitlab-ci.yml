@@ -25,8 +25,9 @@ python3-test:
         - rm get-pip.py
         - pip install --no-index dist/*
         - ls `python3.6 -c "import chromedriver_binary; print(chromedriver_binary.chromedriver_filename)"`
-        - VERSION=$(PATH=`chromedriver-path` chromedriver -v | cut -d' ' -f2 | cut -d'.' -f1-2)
-        - PY_VERS=$(pip freeze | grep 'chromedriver-binary' | cut -d'=' -f3 | cut -d'.' -f1-2)
+        - VERSION=$(PATH=`chromedriver-path` chromedriver -v | cut -d' ' -f2 | cut -d'.' -f1-4)
+        - PY_VERS=$(pip freeze | grep 'chromedriver-binary' | cut -d'=' -f3 | cut -d'.' -f1-4)
+        - echo "Version $VERSION $PY_VERS"
         - test "$VERSION" = "$PY_VERS"
     dependencies:
     - build
@@ -41,8 +42,9 @@ python2-test:
         - rm get-pip.py
         - pip install --no-index dist/*
         - ls `python2.7 -c "import chromedriver_binary; print(chromedriver_binary.chromedriver_filename)"`
-        - VERSION=$(PATH=`chromedriver-path` chromedriver -v | cut -d' ' -f2 | cut -d'.' -f1-2)
-        - PY_VERS=$(pip freeze | grep 'chromedriver-binary' | cut -d'=' -f3 | cut -d'.' -f1-2)
+        - VERSION=$(PATH=`chromedriver-path` chromedriver -v | cut -d' ' -f2 | cut -d'.' -f1-4)
+        - PY_VERS=$(pip freeze | grep 'chromedriver-binary' | cut -d'=' -f3 | cut -d'.' -f1-4)
+        - echo "Version $VERSION $PY_VERS"
         - test "$VERSION" = "$PY_VERS"
     dependencies:
     - build
