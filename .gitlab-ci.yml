@@ -7,9 +7,9 @@ before_script:
 build:
     stage: build
     script:
-        - apt-get install -y python3.6 python3-distutils
-        - python3.6 get-pip.py
-        - python3.6 setup.py sdist
+        - apt-get install -y python3 python3-distutils
+        - python3 get-pip.py
+        - python3 setup.py sdist
     artifacts:
         paths:
         - dist/
@@ -19,12 +19,12 @@ python3-test:
     variables:
           GIT_STRATEGY: none
     script:
-        - apt-get install -y python3.6 python3-distutils
+        - apt-get install -y python3 python3-distutils
         - apt-get install -y libglib2.0-0 libx11-6 libnss3
-        - python3.6 get-pip.py
+        - python3 get-pip.py
         - rm get-pip.py
         - pip install --no-index dist/*
-        - ls `python3.6 -c "import chromedriver_binary; print(chromedriver_binary.chromedriver_filename)"`
+        - ls `python3 -c "import chromedriver_binary; print(chromedriver_binary.chromedriver_filename)"`
         - VERSION=$(PATH=`chromedriver-path` chromedriver -v | cut -d' ' -f2 | cut -d'.' -f1-4)
         - PY_VERS=$(pip freeze | grep 'chromedriver-binary' | cut -d'=' -f3 | cut -d'.' -f1-4)
         - echo "Version $VERSION $PY_VERS"

@@ -16,7 +16,7 @@ def add_chromedriver_to_path():
     if 'PATH' not in os.environ:
         os.environ['PATH'] = chromedriver_dir
     elif chromedriver_dir not in os.environ['PATH']:
-        os.environ['PATH'] += utils.get_variable_separator()+chromedriver_dir
+        os.environ['PATH'] = chromedriver_dir + utils.get_variable_separator() + os.environ['PATH']
 
 
 chromedriver_filename = os.path.join(os.path.abspath(os.path.dirname(__file__)), utils.get_chromedriver_filename())

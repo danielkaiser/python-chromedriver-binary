@@ -5,6 +5,8 @@ Helper functions for filename and URL generation.
 
 import sys
 import os
+import subprocess
+import re
 
 __author__ = 'Daniel Kaiser <d.kasier@fz-juelich.de>'
 
@@ -29,11 +31,11 @@ def get_variable_separator():
     return ':'
 
 
-def get_chromedriver_url(version='74.0.3729.6'):
+def get_chromedriver_url(version):
     """
-    Generates the download URL for current platform , architecture and the given version. Default version is 74.0.3729.6.
+    Generates the download URL for current platform , architecture and the given version.
     Supports Linux, MacOS and Windows.
-    :param version: chromedriver version string, default '74.0.3729.6'
+    :param version: chromedriver version string
     :return: Download URL for chromedriver
     """
     base_url = 'https://chromedriver.storage.googleapis.com/'
@@ -65,6 +67,17 @@ def find_binary_in_path(filename):
         if os.path.isfile(binary) and os.access(binary, os.X_OK):
             return binary
     return None
+
+
+def check_version(binary, required_version):
+    try:
+        version = subprocess.check_output([binary, '-v'])
+        version = re.match(r'.*?([\d.]+).*?', version.decode('utf-8'))[1]
+        if version == required_version:
+            return True
+    except Exception:
+        return False
+    return False
 
 
 def get_chromedriver_path():
