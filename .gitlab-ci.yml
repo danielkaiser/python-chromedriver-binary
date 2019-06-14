@@ -16,34 +16,30 @@ build:
         expire_in: 1 week
 
 python3-test:
-    variables:
-          GIT_STRATEGY: none
     script:
-        - apt-get install -y python3 python3-distutils
+        - apt-get install -y python3 python3-venv
         - apt-get install -y libglib2.0-0 libx11-6 libnss3
-        - python3 get-pip.py
-        - rm get-pip.py
-        - pip install --no-index dist/*
-        - ls `python3 -c "import chromedriver_binary; print(chromedriver_binary.chromedriver_filename)"`
-        - VERSION=$(PATH=`chromedriver-path` chromedriver -v | cut -d' ' -f2 | cut -d'.' -f1-4)
-        - PY_VERS=$(pip freeze | grep 'chromedriver-binary' | cut -d'=' -f3 | cut -d'.' -f1-4)
+        - rm -rf chromedriver_binary
+        - python3 -m venv env
+        - env/bin/pip install --no-index dist/*
+        - ls `env/bin/python3 -c "import chromedriver_binary; print(chromedriver_binary.chromedriver_filename)"`
+        - VERSION=$(PATH=`env/bin/chromedriver-path` chromedriver -v | cut -d' ' -f2 | cut -d'.' -f1-4)
+        - PY_VERS=$(env/bin/pip freeze | grep 'chromedriver-binary' | cut -d'=' -f3 | cut -d'.' -f1-4)
         - echo "Version $VERSION $PY_VERS"
         - test "$VERSION" = "$PY_VERS"
     dependencies:
     - build
 
 python2-test:
-    variables:
-          GIT_STRATEGY: none
     script:
-        - apt-get install -y python2.7
+        - apt-get install -y python2 virtualenv
         - apt-get install -y libglib2.0-0 libx11-6 libnss3
-        - python2.7 get-pip.py
-        - rm get-pip.py
-        - pip install --no-index dist/*
-        - ls `python2.7 -c "import chromedriver_binary; print(chromedriver_binary.chromedriver_filename)"`
-        - VERSION=$(PATH=`chromedriver-path` chromedriver -v | cut -d' ' -f2 | cut -d'.' -f1-4)
-        - PY_VERS=$(pip freeze | grep 'chromedriver-binary' | cut -d'=' -f3 | cut -d'.' -f1-4)
+        - rm -rf chromedriver_binary
+        - virtualenv env
+        - env/bin/pip install --no-index dist/*
+        - ls `env/bin/python2.7 -c "import chromedriver_binary; print(chromedriver_binary.chromedriver_filename)"`
+        - VERSION=$(PATH=`env/bin/chromedriver-path` chromedriver -v | cut -d' ' -f2 | cut -d'.' -f1-4)
+        - PY_VERS=$(env/bin/pip freeze | grep 'chromedriver-binary' | cut -d'=' -f3 | cut -d'.' -f1-4)
         - echo "Version $VERSION $PY_VERS"
         - test "$VERSION" = "$PY_VERS"
     dependencies:
