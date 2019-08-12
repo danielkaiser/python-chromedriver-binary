@@ -1,11 +1,47 @@
+stages:
+    - build
+    - test
+    - deploy-github
+    - deploy-pypi
+
 image: ubuntu:rolling
 before_script:
     - apt-get update
-    - apt-get install -y curl
+    - apt-get install -y curl git
+    - mkdir --mode=700 ~/.ssh/
+    - git config --global user.email "d.kaiser@fz-juelich.de"
+    - git config --global user.name "Daniel Kaiser"
     - curl -sLO https://bootstrap.pypa.io/get-pip.py
+
+generate:
+    stage: build
+    only:
+        - schedule@kaiser/python-chromedriver-binary
+    script:
+        - apt-get install -y python3 python3-venv sed ssh
+        - (umask 0377 && echo "$GITLAB_PRIVATE_KEY" > ~/.ssh/id_rsa
+                      && echo "iffgit.fz-juelich.de $GITLAB_HOST_KEY" >> ~/.ssh/known_hosts)
+        - git remote set-url --push origin gitlab@iffgit.fz-juelich.de:kaiser/python-chromedriver-binary.git
+        - python3 -m venv schedule-env
+        - schedule-env/bin/python -m pip install requests
+        - cp get_versions.py /tmp/
+        - for VERSION in `schedule-env/bin/python /tmp/get_versions.py`; do
+              git checkout master;
+              git checkout origin/schedule README.md setup.py;
+              sed -i "s/@@CHROMEDRIVER_VERSION@@/${VERSION}/g" README.md;
+              sed -i "s/@@CHROMEDRIVER_VERSION@@/${VERSION}/g" setup.py;
+              git add README.md setup.py;
+              git commit -m "Chromedriver version ${VERSION}";
+              git tag -a -m "v${VERSION}.0" "v${VERSION}.0";
+              git push -f origin master;
+              git push -f origin --tags;
+          done
 
 build:
     stage: build
+    only:
+        - master@kaiser/python-chromedriver-binary
+        - tags@kaiser/python-chromedriver-binary
     script:
         - apt-get install -y python3 python3-distutils
         - python3 get-pip.py
@@ -16,6 +52,10 @@ build:
         expire_in: 1 week
 
 python3-test:
+    stage: test
+    only:
+        - master@kaiser/python-chromedriver-binary
+        - tags@kaiser/python-chromedriver-binary
     script:
         - apt-get install -y python3 python3-venv
         - apt-get install -y libglib2.0-0 libx11-6 libnss3
@@ -31,6 +71,10 @@ python3-test:
     - build
 
 python2-test:
+    stage: test
+    only:
+        - master@kaiser/python-chromedriver-binary
+        - tags@kaiser/python-chromedriver-binary
     script:
         - apt-get install -y python2 virtualenv
         - apt-get install -y libglib2.0-0 libx11-6 libnss3
@@ -42,6 +86,42 @@ python2-test:
         - PY_VERS=$(env/bin/pip freeze | grep 'chromedriver-binary' | cut -d'=' -f3 | cut -d'.' -f1-4)
         - echo "Version $VERSION $PY_VERS"
         - test "$VERSION" = "$PY_VERS"
+    dependencies:
+    - build
+
+deploy-github:
+    stage: deploy-github
+    only:
+        - master@kaiser/python-chromedriver-binary
+        - tags@kaiser/python-chromedriver-binary
+    script:
+        - git checkout master
+        - apt install -y ssh
+        - (umask 0377 && echo "$GITHUB_PRIVATE_KEY" > ~/.ssh/id_rsa
+                      && echo "github.com $GITHUB_HOST_KEY" >> ~/.ssh/known_hosts)
+        - git remote add github git@github.com:danielkaiser/python-chromedriver-binary.git
+        - git fetch github
+        - git push -f github master
+        - git push -f github --tags
+
+deploy-pypi:
+    stage: deploy-pypi
+    only:
+        - tags@kaiser/python-chromedriver-binary
+    script:
+        - rm -rf deploy && mkdir deploy && cd deploy
+        - apt-get update
+        - apt-get install -y python3 python3-venv
+        - python3 -m venv env
+        - env/bin/python -m pip install --upgrade pip
+        - env/bin/python -m pip install twine
+        - echo "[distutils]"                                 > ~/.pypirc
+        - echo "index-servers ="                            >> ~/.pypirc
+        - echo "    pypi"                                   >> ~/.pypirc
+        - echo "[pypi]"                                     >> ~/.pypirc
+        - echo "username=$PYPIUSERNAME"                     >> ~/.pypirc
+        - echo "password=$PYPIPASSWORD"                     >> ~/.pypirc
+        - env/bin/twine upload --repository pypi ../dist/*.tar.gz
     dependencies:
     - build
 
