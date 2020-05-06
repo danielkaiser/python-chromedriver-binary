@@ -4,23 +4,19 @@ stages:
     - deploy-github
     - deploy-pypi
 
-image: ubuntu:rolling
-before_script:
-    - apt-get update
-    - apt-get install -y curl git
-    - mkdir --mode=700 ~/.ssh/
-    - git config --global user.email "d.kaiser@fz-juelich.de"
-    - git config --global user.name "Daniel Kaiser"
-    - curl -sLO https://bootstrap.pypa.io/get-pip.py
-
 generate:
     stage: build
+    image: python:3
     only:
         - schedule@kaiser/python-chromedriver-binary
     script:
-        - apt-get install -y python3 python3-venv sed ssh
+        - apt-get update
+        - apt-get install -y python3-venv sed ssh git
+        - mkdir --mode=700 ~/.ssh/
         - (umask 0377 && echo "$GITLAB_PRIVATE_KEY" > ~/.ssh/id_rsa
                       && echo "iffgit.fz-juelich.de $GITLAB_HOST_KEY" >> ~/.ssh/known_hosts)
+        - git config --global user.email "d.kaiser@fz-juelich.de"
+        - git config --global user.name "Daniel Kaiser"
         - git remote set-url --push origin gitlab@iffgit.fz-juelich.de:kaiser/python-chromedriver-binary.git
         - python3 -m venv schedule-env
         - schedule-env/bin/python -m pip install requests
@@ -39,12 +35,11 @@ generate:
 
 build:
     stage: build
+    image: python:3
     only:
         - master@kaiser/python-chromedriver-binary
         - tags@kaiser/python-chromedriver-binary
     script:
-        - apt-get install -y python3 python3-distutils
-        - python3 get-pip.py
         - python3 setup.py sdist
     artifacts:
         paths:
@@ -53,11 +48,13 @@ build:
 
 python3-test:
     stage: test
+    image: python:3
     only:
         - master@kaiser/python-chromedriver-binary
         - tags@kaiser/python-chromedriver-binary
     script:
-        - apt-get install -y python3 python3-venv
+        - apt-get update
+        - apt-get install -y python3-venv
         - apt-get install -y libglib2.0-0 libx11-6 libnss3
         - rm -rf chromedriver_binary
         - python3 -m venv env
@@ -72,11 +69,13 @@ python3-test:
 
 python2-test:
     stage: test
+    image: python:2
     only:
         - master@kaiser/python-chromedriver-binary
         - tags@kaiser/python-chromedriver-binary
     script:
-        - apt-get install -y python2 virtualenv
+        - apt-get update
+        - apt-get install -y virtualenv
         - apt-get install -y libglib2.0-0 libx11-6 libnss3
         - rm -rf chromedriver_binary
         - virtualenv env
@@ -91,14 +90,18 @@ python2-test:
 
 deploy-github:
     stage: deploy-github
+    image: alpine
     only:
         - master@kaiser/python-chromedriver-binary
         - tags@kaiser/python-chromedriver-binary
     script:
+        - apk add --no-cache openssh-client git
         - git checkout master
-        - apt install -y ssh
+        - mkdir --mode=700 ~/.ssh/
         - (umask 0377 && echo "$GITHUB_PRIVATE_KEY" > ~/.ssh/id_rsa
                       && echo "github.com $GITHUB_HOST_KEY" >> ~/.ssh/known_hosts)
+        - git config --global user.email "d.kaiser@fz-juelich.de"
+        - git config --global user.name "Daniel Kaiser"
         - git remote add github git@github.com:danielkaiser/python-chromedriver-binary.git
         - git fetch github
         - git push -f github master
@@ -106,12 +109,13 @@ deploy-github:
 
 deploy-pypi:
     stage: deploy-pypi
+    image: python:3
     only:
         - tags@kaiser/python-chromedriver-binary
     script:
         - rm -rf deploy && mkdir deploy && cd deploy
         - apt-get update
-        - apt-get install -y python3 python3-venv
+        - apt-get install -y python3-venv
         - python3 -m venv env
         - env/bin/python -m pip install --upgrade pip
         - env/bin/python -m pip install twine
