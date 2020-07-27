@@ -55,7 +55,7 @@ python3-test:
     script:
         - apt-get update
         - apt-get install -y python3-venv
-        - apt-get install -y libglib2.0-0 libx11-6 libnss3
+        - apt-get install -y libglib2.0-0 libx11-6 libnss3 libx11-xcb1
         - rm -rf chromedriver_binary
         - python3 -m venv env
         - env/bin/pip install --no-index dist/*
@@ -76,7 +76,7 @@ python2-test:
     script:
         - apt-get update
         - apt-get install -y virtualenv
-        - apt-get install -y libglib2.0-0 libx11-6 libnss3
+        - apt-get install -y libglib2.0-0 libx11-6 libnss3 libx11-xcb1
         - rm -rf chromedriver_binary
         - virtualenv env
         - env/bin/pip install --no-index dist/*
