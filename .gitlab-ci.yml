@@ -39,6 +39,7 @@ build:
     only:
         - master@kaiser/python-chromedriver-binary
         - tags@kaiser/python-chromedriver-binary
+        - chromedriver-binary-auto@kaiser/python-chromedriver-binary
     script:
         - python3 setup.py sdist
     artifacts:
@@ -93,10 +94,11 @@ deploy-github:
     image: alpine
     only:
         - master@kaiser/python-chromedriver-binary
+        - chromedriver-binary-auto@kaiser/python-chromedriver-binary
         - tags@kaiser/python-chromedriver-binary
     script:
         - apk add --no-cache openssh-client git
-        - git checkout master
+        - if [ -n "$CI_COMMIT_BRANCH" ]; then git checkout "$CI_COMMIT_BRANCH"; else git checkout master; fi
         - mkdir --mode=700 ~/.ssh/
         - (umask 0377 && echo "$GITHUB_PRIVATE_KEY" > ~/.ssh/id_rsa
                       && echo "github.com $GITHUB_HOST_KEY" >> ~/.ssh/known_hosts)
@@ -104,8 +106,8 @@ deploy-github:
         - git config --global user.name "Daniel Kaiser"
         - git remote add github git@github.com:danielkaiser/python-chromedriver-binary.git
         - git fetch github
-        - git push -f github master
-        - git push -f github --tags
+        - if [ -n "$CI_COMMIT_BRANCH" ]; then git push -f github "$CI_COMMIT_BRANCH"; fi
+        - if [ -n "$CI_COMMIT_TAG" ]; then git push -f github --tags; fi
 
 deploy-pypi:
     stage: deploy-pypi
@@ -125,6 +127,28 @@ deploy-pypi:
         - echo "[pypi]"                                     >> ~/.pypirc
         - echo "username=$PYPIUSERNAME"                     >> ~/.pypirc
         - echo "password=$PYPIPASSWORD"                     >> ~/.pypirc
+        - env/bin/twine upload --repository pypi ../dist/*.tar.gz
+    dependencies:
+    - build
+
+deploy-pypi-auto:
+    stage: deploy-pypi
+    image: python:3
+    only:
+        - chromedriver-binary-auto@kaiser/python-chromedriver-binary
+    script:
+        - rm -rf deploy && mkdir deploy && cd deploy
+        - apt-get update
+        - apt-get install -y python3-venv
+        - python3 -m venv env
+        - env/bin/python -m pip install --upgrade pip
+        - env/bin/python -m pip install twine
+        - echo "[distutils]"                                 > ~/.pypirc
+        - echo "index-servers ="                            >> ~/.pypirc
+        - echo "    pypi"                                   >> ~/.pypirc
+        - echo "[pypi]"                                     >> ~/.pypirc
+        - echo "username=$PYPIUSERNAME"                     >> ~/.pypirc
+        - echo "password=$PYPIPASSWORD_AUTO"                >> ~/.pypirc
         - env/bin/twine upload --repository pypi ../dist/*.tar.gz
     dependencies:
     - build
