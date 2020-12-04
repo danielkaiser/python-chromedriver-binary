@@ -1,6 +1,7 @@
 from setuptools import setup
 from setuptools.command.build_py import build_py
-from chromedriver_binary.utils import get_chromedriver_filename, get_chromedriver_url, find_binary_in_path, check_version
+from chromedriver_binary.utils import get_chromedriver_filename, get_chromedriver_url, find_binary_in_path, \
+    check_version, get_chrome_major_version, get_latest_release_for_version
 
 import os
 import zipfile
@@ -25,7 +26,8 @@ class DownloadChromedriver(build_py):
         Downloads, unzips and installs chromedriver.
         If a chromedriver binary is found in PATH it will be copied, otherwise downloaded.
         """
-        chromedriver_version='88.0.4324.27'
+        chrome_major = get_chrome_major_version()
+        chromedriver_version = get_latest_release_for_version(chrome_major)
         chromedriver_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'chromedriver_binary')
         chromedriver_filename = find_binary_in_path(get_chromedriver_filename())
         if chromedriver_filename and check_version(chromedriver_filename, chromedriver_version):
@@ -57,8 +59,8 @@ class DownloadChromedriver(build_py):
 
 
 setup(
-    name="chromedriver-binary",
-    version="88.0.4324.27.0",
+    name="chromedriver-binary-auto",
+    version="0.1",
     author="Daniel Kaiser",
     author_email="daniel.kaiser94@gmail.com",
     description="Installer for chromedriver.",
