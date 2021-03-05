@@ -98,7 +98,7 @@ def get_chrome_major_version():
     Detects the major version number of the installed chrome/chromium browser.
     :return: The browsers major version number or None
     """
-    browser_executables = ['google-chrome', 'chrome', 'chrome-browser', 'chromium', 'chromium-browser']
+    browser_executables = ['google-chrome', 'chrome', 'chrome-browser', 'google-chrome-stable', 'chromium', 'chromium-browser']
     for browser_executable in browser_executables:
         try:
             version = subprocess.check_output([browser_executable, '--version'])
