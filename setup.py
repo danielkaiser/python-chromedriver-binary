@@ -4,6 +4,9 @@ from chromedriver_binary.utils import get_chromedriver_filename, get_chromedrive
 
 import os
 import zipfile
+import ssl
+
+ssl._create_default_https_context = ssl._create_unverified_context
 
 try:
     from io import BytesIO
