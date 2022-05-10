@@ -99,6 +99,9 @@ def get_chrome_major_version():
     :return: The browsers major version number or None
     """
     browser_executables = ['google-chrome', 'chrome', 'chrome-browser', 'google-chrome-stable', 'chromium', 'chromium-browser']
+    if sys.platform == "darwin":
+        browser_executables.insert(0, "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")
+
     for browser_executable in browser_executables:
         try:
             version = subprocess.check_output([browser_executable, '--version'])
