@@ -36,6 +36,8 @@ pip install --upgrade --force-reinstall chromedriver-binary-auto
 pip install git+https://github.com/danielkaiser/python-chromedriver-binary.git@chromedriver-binary-auto
 ```
 
+If the installed chromedriver version does not match your browser's version please try to [empty pip's cache](https://pip.pypa.io/en/stable/cli/pip_cache/) or disable the cache during (re-)installation.
+
 ## Usage
 To use chromedriver just `import chromedriver_binary`. This will add the executable to your PATH so it will be found. You can also get the absolute filename of the binary with `chromedriver_binary.chromedriver_filename`.
 
