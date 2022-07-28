@@ -7,6 +7,7 @@ import sys
 import os
 import subprocess
 import re
+import platform
 
 try:
     from urllib.request import urlopen, URLError
@@ -45,17 +46,19 @@ def get_chromedriver_url(version):
     """
     base_url = 'https://chromedriver.storage.googleapis.com/'
     if sys.platform.startswith('linux') and sys.maxsize > 2 ** 32:
-        platform = 'linux'
+        _platform = 'linux'
         architecture = '64'
     elif sys.platform == 'darwin':
-        platform = 'mac'
+        _platform = 'mac'
         architecture = '64'
+        if platform.machine() == 'arm64':
+            architecture += '_m1'
     elif sys.platform.startswith('win'):
-        platform = 'win'
+        _platform = 'win'
         architecture = '32'
     else:
         raise RuntimeError('Could not determine chromedriver download URL for this platform.')
-    return base_url + version + '/chromedriver_' + platform + architecture + '.zip'
+    return base_url + version + '/chromedriver_' + _platform + architecture + '.zip'
 
 
 def find_binary_in_path(filename):
