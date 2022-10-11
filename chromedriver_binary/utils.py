@@ -52,7 +52,7 @@ def get_chromedriver_url(version):
         _platform = 'mac'
         architecture = '64'
         if platform.machine() == 'arm64':
-            if version.split('.')[0] < 107:
+            if int(version.split('.')[0]) < 107:
                 architecture += '_m1'
             else:
                 architecture = '_arm64'
