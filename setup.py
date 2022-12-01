@@ -4,6 +4,7 @@ from chromedriver_binary.utils import get_chromedriver_filename, get_chromedrive
     check_version, get_chrome_major_version, get_latest_release_for_version
 
 import os
+import ssl
 import zipfile
 
 try:
@@ -43,7 +44,7 @@ class DownloadChromedriver(build_py):
                     os.mkdir(chromedriver_dir)
                 url = get_chromedriver_url(version=chromedriver_version)
                 try:
-                    response = urlopen(url)
+                    response = urlopen(url, context=ssl.SSLContext(protocol=ssl.PROTOCOL_TLS))
                     if response.getcode() != 200:
                         raise URLError('Not Found')
                 except URLError:
@@ -60,7 +61,7 @@ class DownloadChromedriver(build_py):
 
 setup(
     name="chromedriver-binary-auto",
-    version="0.2.1",
+    version="0.2.3",
     author="Daniel Kaiser",
     author_email="daniel.kaiser94@gmail.com",
     description="Installer for chromedriver.",
