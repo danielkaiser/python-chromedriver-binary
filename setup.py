@@ -26,7 +26,7 @@ class DownloadChromedriver(build_py):
         Downloads, unzips and installs chromedriver.
         If a chromedriver binary is found in PATH it will be copied, otherwise downloaded.
         """
-        chromedriver_version='110.0.5481.77'
+        chromedriver_version='111.0.5563.19'
         chromedriver_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'chromedriver_binary')
         chromedriver_filename = find_binary_in_path(get_chromedriver_filename())
         if chromedriver_filename and check_version(chromedriver_filename, chromedriver_version):
@@ -59,7 +59,7 @@ class DownloadChromedriver(build_py):
 
 setup(
     name="chromedriver-binary",
-    version="110.0.5481.77.0",
+    version="111.0.5563.19.0",
     author="Daniel Kaiser",
     author_email="daniel.kaiser94@gmail.com",
     description="Installer for chromedriver.",
