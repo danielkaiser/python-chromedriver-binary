@@ -44,7 +44,7 @@ class DownloadChromedriver(build_py):
                     os.mkdir(chromedriver_dir)
                 url = get_chromedriver_url(version=chromedriver_version)
                 try:
-                    response = urlopen(url, context=ssl.SSLContext(protocol=ssl.PROTOCOL_TLS))
+                    response = urlopen(url, context=ssl.SSLContext())
                     if response.getcode() != 200:
                         raise URLError('Not Found')
                 except URLError:
