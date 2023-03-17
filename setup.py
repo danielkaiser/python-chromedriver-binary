@@ -9,9 +9,11 @@ import zipfile
 try:
     from io import BytesIO
     from urllib.request import urlopen, URLError
+    ssl_context = ssl.SSLContext()
 except ImportError:
     from StringIO import StringIO as BytesIO
     from urllib2 import urlopen, URLError
+    ssl_context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
 
 __author__ = 'Daniel Kaiser <d.kasier@fz-juelich.de>'
 
@@ -26,7 +28,7 @@ class DownloadChromedriver(build_py):
         Downloads, unzips and installs chromedriver.
         If a chromedriver binary is found in PATH it will be copied, otherwise downloaded.
         """
-        chromedriver_version='111.0.5563.64'
+        chromedriver_version='112.0.5615.28'
         chromedriver_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'chromedriver_binary')
         chromedriver_filename = find_binary_in_path(get_chromedriver_filename())
         if chromedriver_filename and check_version(chromedriver_filename, chromedriver_version):
@@ -42,7 +44,7 @@ class DownloadChromedriver(build_py):
                     os.mkdir(chromedriver_dir)
                 url = get_chromedriver_url(version=chromedriver_version)
                 try:
-                    response = urlopen(url, context=ssl.SSLContext(protocol=ssl.PROTOCOL_TLS))
+                    response = urlopen(url, context=ssl_context)
                     if response.getcode() != 200:
                         raise URLError('Not Found')
                 except URLError:
@@ -59,7 +61,7 @@ class DownloadChromedriver(build_py):
 
 setup(
     name="chromedriver-binary",
-    version="111.0.5563.64.0",
+    version="112.0.5615.28.0",
     author="Daniel Kaiser",
     author_email="daniel.kaiser94@gmail.com",
     description="Installer for chromedriver.",

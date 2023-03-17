@@ -12,8 +12,10 @@ import platform
 
 try:
     from urllib.request import urlopen, URLError
+    ssl_context = ssl.SSLContext()
 except ImportError:
     from urllib2 import urlopen, URLError
+    ssl_context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
 
 __author__ = 'Daniel Kaiser <d.kasier@fz-juelich.de>'
 
@@ -92,7 +94,7 @@ def get_latest_release_for_version(version=None):
     if version:
         release_url += '_{}'.format(version)
     try:
-        response = urlopen(release_url, context=ssl.SSLContext(protocol=ssl.PROTOCOL_TLS))
+        response = urlopen(release_url, context=ssl_context)
         if response.getcode() != 200:
             raise URLError('Not Found')
         return response.read().decode('utf-8').strip()
