@@ -10,9 +10,11 @@ import zipfile
 try:
     from io import BytesIO
     from urllib.request import urlopen, URLError
+    ssl_context = ssl.SSLContext()
 except ImportError:
     from StringIO import StringIO as BytesIO
     from urllib2 import urlopen, URLError
+    ssl_context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
 
 __author__ = 'Daniel Kaiser <d.kasier@fz-juelich.de>'
 
@@ -44,7 +46,7 @@ class DownloadChromedriver(build_py):
                     os.mkdir(chromedriver_dir)
                 url = get_chromedriver_url(version=chromedriver_version)
                 try:
-                    response = urlopen(url, context=ssl.SSLContext())
+                    response = urlopen(url, context=ssl_context)
                     if response.getcode() != 200:
                         raise URLError('Not Found')
                 except URLError:
