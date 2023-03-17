@@ -89,6 +89,44 @@ python2-test:
     dependencies:
     - build
 
+python3-test-auto:
+    stage: test
+    image: python:3
+    only:
+        - chromedriver-binary-auto@kaiser/python-chromedriver-binary
+    script:
+        - apt-get update
+        - apt-get install -y python3-venv libglib2.0-0 libx11-6 libnss3 libx11-xcb1 chromium
+        - rm -rf chromedriver_binary
+        - python3 -m venv env
+        - env/bin/pip install --no-index dist/*
+        - ls `env/bin/python3 -c "import chromedriver_binary; print(chromedriver_binary.chromedriver_filename)"`
+        - VERSION=$(PATH=`env/bin/chromedriver-path` chromedriver -v | cut -d' ' -f2 | cut -d'.' -f1)
+        - CHROME_MAJOR=$(chromium --version | cut -d' ' -f2 | cut -d'.' -f1)
+        - echo "Version $VERSION $CHROME_MAJOR"
+        - test "$VERSION" = "$CHROME_MAJOR"
+    dependencies:
+        - build
+
+python2-test-auto:
+    stage: test
+    image: python:2
+    only:
+        - chromedriver-binary-auto@kaiser/python-chromedriver-binary
+    script:
+        - apt-get update
+        - apt-get install -y virtualenv libglib2.0-0 libx11-6 libnss3 libx11-xcb1 chromium
+        - rm -rf chromedriver_binary
+        - virtualenv env
+        - env/bin/pip install --no-index dist/*
+        - ls `env/bin/python2.7 -c "import chromedriver_binary; print(chromedriver_binary.chromedriver_filename)"`
+        - VERSION=$(PATH=`env/bin/chromedriver-path` chromedriver -v | cut -d' ' -f2 | cut -d'.' -f1)
+        - CHROME_MAJOR=$(chromium --version | cut -d' ' -f2 | cut -d'.' -f1)
+        - echo "Version $VERSION $CHROME_MAJOR"
+        - test "$VERSION" = "$CHROME_MAJOR"
+    dependencies:
+        - build
+
 deploy-github:
     stage: deploy-github
     image: alpine
