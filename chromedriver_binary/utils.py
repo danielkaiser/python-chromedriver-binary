@@ -9,6 +9,8 @@ import ssl
 import subprocess
 import re
 import platform
+import array
+import ctypes
 
 try:
     from urllib.request import urlopen, URLError
@@ -111,20 +113,43 @@ def get_chrome_major_version():
     if sys.platform == "darwin":
         browser_executables.insert(0, "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")
 
-    get_raw_version = lambda executable: subprocess.check_output([executable, '--version'])
-    get_parsed_version = lambda version: re.match(r'.*?((?P<major>\d+)\.(\d+\.){2,3}\d+).*?', version.decode('utf-8')).group('major')
-    get_major_version = lambda executable: get_parsed_version(get_raw_version(executable))
+    get_version = lambda version: re.match(r'.*?((?P<major>\d+)\.(\d+\.){2,3}\d+).*?', version).group('major')
 
     for browser_executable in browser_executables:
         try:
-            return get_major_version(browser_executable)
+            version = subprocess.check_output([browser_executable, '--version'])
+            
+            return get_version(version.decode('utf-8'))
+        
         except Exception:
             if sys.platform.startswith('win'):
-                roots = filter(None, [os.getenv('LocalAppData'), os.getenv('ProgramFiles'), os.getenv('ProgramFiles(x86)'), os.getenv('ProgramW6432')])
+                roots = list(filter(None, [os.getenv('LocalAppData'), os.getenv('ProgramFiles'), os.getenv('ProgramFiles(x86)'), os.getenv('ProgramW6432')]))
 
                 for root in roots:
                     try:
-                        return get_major_version(os.path.join(root, 'Google', 'Chrome', 'Application', browser_executable + '.exe'))
+                        # https://stackoverflow.com/questions/580924/how-to-access-a-files-properties-on-windows
+                        document = ctypes.wstring_at(os.path.join(root, 'Google', 'Chrome', 'Application', browser_executable + '.exe'))
+                        
+                        buffer_size = ctypes.windll.version.GetFileVersionInfoSizeW(document, None)
+                        buffer = ctypes.create_string_buffer(buffer_size)
+
+                        ctypes.windll.version.GetFileVersionInfoW(document, None, buffer_size, buffer)
+
+                        value_size = ctypes.c_uint(0)
+                        value = ctypes.c_void_p(0)
+
+                        ctypes.windll.version.VerQueryValueW(buffer, ctypes.wstring_at(r"\VarFileInfo\Translation"), ctypes.byref(value), ctypes.byref(value_size))
+
+                        codepages = array.array('H', ctypes.string_at(value.value, value_size.value))
+
+                        language = '{0:04x}{1:04x}'.format(*codepages[:2].tolist())
+
+                        ctypes.windll.version.VerQueryValueW(buffer, ctypes.wstring_at('\\StringFileInfo\\' + language + '\\FileVersion'), ctypes.byref(value), ctypes.byref(value_size))
+
+                        version = ctypes.wstring_at(value.value, value_size.value - 1)
+                        
+                        return get_version(version)
+                    
                     except Exception:
                         pass
             pass
