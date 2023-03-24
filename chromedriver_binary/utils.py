@@ -111,13 +111,23 @@ def get_chrome_major_version():
     if sys.platform == "darwin":
         browser_executables.insert(0, "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")
 
+    get_raw_version = lambda executable: subprocess.check_output([executable, '--version'])
+    get_parsed_version = lambda version: re.match(r'.*?((?P<major>\d+)\.(\d+\.){2,3}\d+).*?', version.decode('utf-8')).group('major')
+    get_major_version = lambda executable: get_parsed_version(get_raw_version(executable))
+
     for browser_executable in browser_executables:
         try:
-            version = subprocess.check_output([browser_executable, '--version'])
-            return re.match(r'.*?((?P<major>\d+)\.(\d+\.){2,3}\d+).*?', version.decode('utf-8')).group('major')
+            return get_major_version(browser_executable)
         except Exception:
-            pass
+            if sys.platform.startswith('win'):
+                roots = filter(None, [os.getenv('LocalAppData'), os.getenv('ProgramFiles'), os.getenv('ProgramFiles(x86)'), os.getenv('ProgramW6432')])
 
+                for root in roots:
+                    try:
+                        return get_major_version(os.path.join(root, 'Google', 'Chrome', 'Application', browser_executable + '.exe'))
+                    except Exception:
+                        pass
+            pass
 
 def check_version(binary, required_version):
     try:
