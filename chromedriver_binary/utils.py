@@ -113,16 +113,16 @@ def get_chrome_major_version():
     if sys.platform == "darwin":
         browser_executables.insert(0, "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")
 
-    get_version = lambda version: re.match(r'.*?((?P<major>\d+)\.(\d+\.){2,3}\d+).*?', version).group('major')
+    get_major_version = lambda version: re.match(r'.*?((?P<major>\d+)\.(\d+\.){2,3}\d+).*?', version).group('major')
 
     for browser_executable in browser_executables:
         try:
             version = subprocess.check_output([browser_executable, '--version'])
             
-            return get_version(version.decode('utf-8'))
+            return get_major_version(version.decode('utf-8'))
         
         except Exception:
-            if sys.platform.startswith('win'):
+            if sys.platform.startswith('win') or sys.platform.startswith('cygwin'):
                 get_info_size = ctypes.windll.version.GetFileVersionInfoSizeW
                 get_info = ctypes.windll.version.GetFileVersionInfoW
                 get_value = ctypes.windll.version.VerQueryValueW
@@ -159,7 +159,7 @@ def get_chrome_major_version():
 
                         version = get_string(value.value, value_size.value - 1)
                         
-                        return get_version(version)
+                        return get_major_version(version)
                     
                     except Exception:
                         pass
