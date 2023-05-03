@@ -12,7 +12,7 @@ import platform
 
 try:
     from urllib.request import urlopen, URLError
-    ssl_context = ssl.SSLContext()
+    ssl_context = ssl.create_default_context()
 except ImportError:
     from urllib2 import urlopen, URLError
     ssl_context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
