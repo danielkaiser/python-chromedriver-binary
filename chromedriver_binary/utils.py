@@ -2,7 +2,7 @@
 """
 Helper functions for filename and URL generation.
 """
-
+import json
 import sys
 import os
 import ssl
@@ -40,10 +40,9 @@ def get_variable_separator():
     return ':'
 
 
-def get_chromedriver_url(version):
+def get_legacy_chromedriver_url(version):
     """
-    Generates the download URL for current platform , architecture and the given version.
-    Supports Linux, MacOS and Windows.
+    Generates the download URL for legacy releases
     :param version: chromedriver version string
     :return: Download URL for chromedriver
     """
@@ -67,6 +66,34 @@ def get_chromedriver_url(version):
     return base_url + version + '/chromedriver_' + _platform + architecture + '.zip'
 
 
+def get_chromedriver_url(version):
+    """
+    Generates the download URL for current platform, architecture and the given version.
+    Supports Linux, macOS and Windows.
+    :param version: chromedriver version string
+    :return: Download URL for chromedriver
+    """
+    if sys.platform.startswith('linux') and sys.maxsize > 2 ** 32:
+        _platform = 'linux64'
+    elif sys.platform == 'darwin' and platform.machine() == 'arm64':
+        _platform = 'mac-arm64'
+    elif sys.platform == 'darwin':
+        _platform = 'mac-x64'
+    elif sys.platform.startswith('win'):
+        _platform = 'win' + '64' if sys.maxsize > 2 ** 32 else '32'
+    else:
+        raise RuntimeError('Could not determine chromedriver download URL for this platform.')
+    response = urlopen("https://googlechromelabs.github.io/chrome-for-testing/latest-patch-versions-per-build-with-downloads.json", context=ssl_context)
+    if int(version.split('.')[0]) >= 115:
+        version = '.'.join(version.split('.')[:3])  # ensure major.minor.patch
+        for p in json.load(response)["builds"][version]["downloads"]["chromedriver"]:
+            if p["platform"] == _platform:
+                return p["url"]
+    else:
+        return get_legacy_chromedriver_url(version)
+    raise RuntimeError('Could not determine chromedriver download URL for this platform.')
+
+
 def find_binary_in_path(filename):
     """
     Searches for a binary named `filename` in the current PATH. If an executable is found, its absolute path is returned
@@ -83,10 +110,9 @@ def find_binary_in_path(filename):
     return None
 
 
-def get_latest_release_for_version(version=None):
+def get_latest_legacy_release_for_version(version):
     """
-    Searches for the latest release (complete version string) for a given major `version`. If `version` is None
-    the latest release is returned.
+    Searches for the latest release (complete version string) for a given major `version` in the legacy storage.
     :param version: Major version number or None
     :return: Latest release for given version
     """
@@ -100,6 +126,25 @@ def get_latest_release_for_version(version=None):
         return response.read().decode('utf-8').strip()
     except URLError:
         raise RuntimeError('Failed to find release information: {}'.format(release_url))
+
+
+def get_latest_release_for_version(version=None):
+    """
+    Searches for the latest release (complete version string) for a given major `version`. If `version` is None
+    the latest Stable release is returned.
+    :param version: Major version number or None
+    :return: Latest release for given version
+    """
+    try:
+        if version is None:
+            response = urlopen("https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json", context=ssl_context)
+            return json.load(response)["channels"]["Stable"]["version"]
+        if int(version) < 113:
+            return get_latest_legacy_release_for_version(version)
+        response = urlopen("https://googlechromelabs.github.io/chrome-for-testing/latest-versions-per-milestone-with-downloads.json", context=ssl_context)
+        return json.load(response)["milestones"][str(version)]["version"]
+    except Exception:
+        raise RuntimeError('Failed to find release information for version: {}'.format(version if version else "latest"))
 
 
 def get_chrome_major_version():
