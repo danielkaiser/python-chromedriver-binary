@@ -139,7 +139,7 @@ def get_latest_release_for_version(version=None):
         if version is None:
             response = urlopen("https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json", context=ssl_context)
             return json.load(response)["channels"]["Stable"]["version"]
-        if int(version) < 113:
+        if int(version) < 115:
             return get_latest_legacy_release_for_version(version)
         response = urlopen("https://googlechromelabs.github.io/chrome-for-testing/latest-versions-per-milestone-with-downloads.json", context=ssl_context)
         return json.load(response)["milestones"][str(version)]["version"]

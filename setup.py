@@ -67,7 +67,7 @@ class DownloadChromedriver(build_py):
 
 setup(
     name="chromedriver-binary-auto",
-    version="0.3.0",
+    version="0.3.1",
     author="Daniel Kaiser",
     author_email="daniel.kaiser94@gmail.com",
     description="Installer for chromedriver.",
