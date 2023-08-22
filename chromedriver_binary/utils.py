@@ -122,22 +122,30 @@ def get_chrome_major_version():
             return get_major_version(version.decode('utf-8'))
         
         except Exception:
-            if sys.platform.startswith('win') or sys.platform.startswith('cygwin'):                
-                roots = list(filter(None, [os.getenv('LocalAppData'), os.getenv('ProgramFiles'), os.getenv('ProgramFiles(x86)'), os.getenv('ProgramW6432')]))
-          
-                for root in roots:
-                    try:
-                        # https://stackoverflow.com/questions/580924/how-to-access-a-files-properties-on-windows
-                        document = os.path.join(root, 'Google', 'Chrome', 'Application', browser_executable + '.exe')
+            if sys.platform.startswith('win') or sys.platform.startswith('cygwin'):
+                try:
+                    import winreg
+                    with winreg.OpenKeyEx(winreg.HKEY_CURRENT_USER, r"Software\Google\Chrome\BLBeacon") as key:
+                        version = winreg.QueryValueEx(key, "version")[0]
+
+                        return get_major_version(version)
+                
+                except Exception:
+                    roots = list(filter(None, [os.getenv('LocalAppData'), os.getenv('ProgramFiles'), os.getenv('ProgramFiles(x86)'), os.getenv('ProgramW6432')]))
+                
+                    for root in roots:
+                        try:
+                            # https://stackoverflow.com/questions/580924/how-to-access-a-files-properties-on-windows
+                            document = os.path.join(root, 'Google', 'Chrome', 'Application', browser_executable + '.exe')
+                            
+                            name = document.replace(os.path.sep, f'{os.path.sep}{os.path.sep}')
+                            
+                            version = subprocess.check_output(['wmic', 'datafile', 'where', f'name="{name}"', 'get', 'Version', '/value'])
+                            
+                            return get_major_version(version.decode('utf-8').strip())
                         
-                        name = document.replace(os.path.sep, f'{os.path.sep}{os.path.sep}')
-                        
-                        version = subprocess.check_output(['wmic', 'datafile', 'where', f'name="{name}"', 'get', 'Version', '/value'])
-                        
-                        return get_major_version(version.decode('utf-8').strip())
-                    
-                    except Exception:
-                        pass
+                        except Exception:
+                            pass
             pass
 
 def check_version(binary, required_version):
