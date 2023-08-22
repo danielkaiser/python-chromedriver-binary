@@ -148,6 +148,7 @@ def get_chrome_major_version():
                             pass
             pass
 
+
 def check_version(binary, required_version):
     try:
         version = subprocess.check_output([binary, '-v'])
