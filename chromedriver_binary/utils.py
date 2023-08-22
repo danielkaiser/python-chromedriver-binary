@@ -123,47 +123,31 @@ def get_chrome_major_version():
         
         except Exception:
             if sys.platform.startswith('win') or sys.platform.startswith('cygwin'):
-                get_info_size = ctypes.windll.version.GetFileVersionInfoSizeW
-                get_info = ctypes.windll.version.GetFileVersionInfoW
-                get_value = ctypes.windll.version.VerQueryValueW
-                get_string = ctypes.wstring_at
+                try:
+                    import winreg
+                    with winreg.OpenKeyEx(winreg.HKEY_CURRENT_USER, r"Software\Google\Chrome\BLBeacon") as key:
+                        version = winreg.QueryValueEx(key, "version")[0]
 
-                if sys.version_info.major < 3:
-                    get_info_size = ctypes.windll.version.GetFileVersionInfoSizeA
-                    get_info = ctypes.windll.version.GetFileVersionInfoA
-                    get_value = ctypes.windll.version.VerQueryValueA
-                    get_string = ctypes.string_at
-                
-                roots = list(filter(None, [os.getenv('LocalAppData'), os.getenv('ProgramFiles'), os.getenv('ProgramFiles(x86)'), os.getenv('ProgramW6432')]))
-          
-                for root in roots:
-                    try:
-                        # https://stackoverflow.com/questions/580924/how-to-access-a-files-properties-on-windows
-                        document = ctypes.wstring_at(os.path.join(root, 'Google', 'Chrome', 'Application', browser_executable + '.exe'))
-                        
-                        buffer_size = get_info_size(document, None)
-                        buffer = ctypes.create_string_buffer(buffer_size)
-
-                        get_info(document, None, buffer_size, buffer)
-
-                        value_size = ctypes.c_uint(0)
-                        value = ctypes.c_void_p(0)
-
-                        get_value(buffer, get_string(r"\VarFileInfo\Translation"), ctypes.byref(value), ctypes.byref(value_size))
-
-                        codepages = array.array('H', ctypes.string_at(value.value, value_size.value))
-
-                        language = '{0:04x}{1:04x}'.format(*codepages[:2].tolist())
-
-                        get_value(buffer, get_string('\\StringFileInfo\\' + language + '\\FileVersion'), ctypes.byref(value), ctypes.byref(value_size))
-
-                        version = get_string(value.value, value_size.value - 1)
-                        
                         return get_major_version(version)
-                    
-                    except Exception:
-                        pass
+                
+                except Exception:
+                    roots = list(filter(None, [os.getenv('LocalAppData'), os.getenv('ProgramFiles'), os.getenv('ProgramFiles(x86)'), os.getenv('ProgramW6432')]))
+                
+                    for root in roots:
+                        try:
+                            # https://stackoverflow.com/questions/580924/how-to-access-a-files-properties-on-windows
+                            document = os.path.join(root, 'Google', 'Chrome', 'Application', browser_executable + '.exe')
+                            
+                            name = document.replace(os.path.sep, f'{os.path.sep}{os.path.sep}')
+                            
+                            version = subprocess.check_output(['wmic', 'datafile', 'where', f'name="{name}"', 'get', 'Version', '/value'])
+                            
+                            return get_major_version(version.decode('utf-8').strip())
+                        
+                        except Exception:
+                            pass
             pass
+
 
 def check_version(binary, required_version):
     try:
