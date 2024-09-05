@@ -40,6 +40,8 @@ build:
         - master@kaiser/python-chromedriver-binary
         - tags@kaiser/python-chromedriver-binary
         - chromedriver-binary-auto@kaiser/python-chromedriver-binary
+    before_script:
+        - python3 -m pip install setuptools
     script:
         - python3 setup.py sdist
     artifacts:
