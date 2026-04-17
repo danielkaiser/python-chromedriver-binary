@@ -20,7 +20,7 @@ except ImportError:
 __author__ = 'Daniel Kaiser <d.kasier@fz-juelich.de>'
 
 
-def get_chromedriver_filename():
+def get_chromedriver_filename() -> str:
     """
     Returns the filename of the binary for the current platform.
     :return: Binary filename
@@ -30,7 +30,7 @@ def get_chromedriver_filename():
     return 'chromedriver'
 
 
-def get_variable_separator():
+def get_variable_separator() -> str:
     """
     Returns the environment variable separator for the current platform.
     :return: Environment variable separator
@@ -40,7 +40,7 @@ def get_variable_separator():
     return ':'
 
 
-def get_legacy_chromedriver_url(version):
+def get_legacy_chromedriver_url(version: int):
     """
     Generates the download URL for legacy releases
     :param version: chromedriver version string
@@ -66,7 +66,7 @@ def get_legacy_chromedriver_url(version):
     return base_url + version + '/chromedriver_' + _platform + architecture + '.zip'
 
 
-def get_chromedriver_url(version):
+def get_chromedriver_url(version: int):
     """
     Generates the download URL for current platform, architecture and the given version.
     Supports Linux, macOS and Windows.
@@ -94,7 +94,7 @@ def get_chromedriver_url(version):
     raise RuntimeError('Could not determine chromedriver download URL for this platform.')
 
 
-def find_binary_in_path(filename):
+def find_binary_in_path(filename: str) -> None:
     """
     Searches for a binary named `filename` in the current PATH. If an executable is found, its absolute path is returned
     else None.
@@ -110,7 +110,7 @@ def find_binary_in_path(filename):
     return None
 
 
-def get_latest_legacy_release_for_version(version):
+def get_latest_legacy_release_for_version(version: int):
     """
     Searches for the latest release (complete version string) for a given major `version` in the legacy storage.
     :param version: Major version number or None
@@ -128,7 +128,7 @@ def get_latest_legacy_release_for_version(version):
         raise RuntimeError('Failed to find release information: {}'.format(release_url))
 
 
-def get_latest_release_for_version(version=None):
+def get_latest_release_for_version(version: int=None):
     """
     Searches for the latest release (complete version string) for a given major `version`. If `version` is None
     the latest Stable release is returned.
@@ -164,7 +164,7 @@ def get_chrome_major_version():
             pass
 
 
-def check_version(binary, required_version):
+def check_version(binary, required_version) -> bool:
     try:
         version = subprocess.check_output([binary, '-v'])
         version = re.match(r'.*?([\d.]+).*?', version.decode('utf-8'))[1]
@@ -182,7 +182,7 @@ def get_chromedriver_path():
     return os.path.abspath(os.path.dirname(__file__))
 
 
-def print_chromedriver_path():
+def print_chromedriver_path() -> None:
     """
     Print the path of the chromedriver binary.
     """
